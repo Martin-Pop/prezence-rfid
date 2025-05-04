@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Karty</title>
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="messages">
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <form method="post" action="{{ url_for('add_karta') }}" autocomplete="off">
+        <label for="jmeno">Jméno:</label>
+        <input type="text" name="jmeno" id="jmeno" required>
+    
+        <label for="uid">UID:</label>
+        <input type="text" name="uid" id="uid" required>
+    
+        <button type="submit">Přidat Kartu</button>
+    </form>
+    <table>
+        <colgroup>
+            <col style="width: 25%;"> 
+            <col style="width: 30%;"> 
+            <col style="width: 15%;">
+            <col style="width: 15%;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>Jméno</th>
+                <th>UID</th>
+                <th>Validita</th>
+                <th> </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if karty is not defined or karty|length == 0 %}
+            <tr>
+                <td colspan="4">Žádné záznamy</td>
+            </tr>
+            {% else %}
+                {% for karta in karty %}
+                <tr id="row-{{ loop.index }}">
+                    <!-- Display mode -->
+                    <td class="mode">
+                        <span>{{ karta[0] }}</span>
+                    </td>
+                    <td class="mode">
+                        <span>{{ karta[1] }}</span>
+                    </td>
+                    <td class="mode">
+                        <span>{{ "Validní" if karta[2] else "Nevalidní" }}</span>
+                    </td>
+                    <td class="mode">
+                        <button type="button" onclick="toggle(this)">Upravit</button>
+                    </td>
+            
+                    <!-- Edit mode -->
+                    <form method="post" action="{{ url_for('edit_karta',page=page, old_uid=karta[1]) }}" class="edit-mode" style="display: none;">
+                        <td class="mode" style="display: none;">
+                            <input type="text" name="jmeno" value="{{ karta[0] }}" required>
+                        </td>
+                        <td class="mode" style="display: none;">
+                            <input type="text" name="uid" value="{{ karta[1] }}" required>
+                        </td>
+                        <td class="mode" style="display: none;">
+                            <input type="checkbox" name="valid" {% if karta[2] %}checked{% endif %}>
+                        </td>
+                        <td class="mode" style="display: none;">
+                            <button type="submit">Uložit</button>
+                            <button type="button" onclick="toggle(this)">Zrušit</button>
+                        </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+    <div class="page-navigation row-container" id="page-navigation">
+        {% if page > 1 %}
+            <a href="{{ url_for('karty', page=page-1,pocet=pocet)}}#page-navigation">&lt;</a>
+        {% else %}
+            <a class="invisible">&lt;</a>
+        {% endif %}
+        <span>{{page}}</span>
+        {% if karty|length == pocet %}
+            <a href="{{ url_for('karty', page=page+1, pocet=pocet)}}#page-navigation">&gt;</a>
+        {% else %}
+            <a class="invisible">&gt;</a>
+        {% endif %}
+    </div>
+    <nav class="row-container">
+        <a  class="color-transition" href="{{ url_for('prezence', page=1) }}">Prezence</a>
+        <a class="color-transition" href="{{ url_for('zaznamy', page=1) }}">Záznamy</a>
+        <span class="selected">Karty</span>
+    </nav>
+    <script>
+        function toggle(button) {
+            const row = button.closest('tr');
+            const displayMode = row.querySelectorAll('.mode');
+            
+            displayMode.forEach(cell => {
+                cell.style.display = cell.style.display === 'none' ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

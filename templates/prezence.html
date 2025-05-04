@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prezence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    
+    <table class="zaznamy">
+        <colgroup>
+            <col style="width: 25%;"> 
+            <col style="width: 30%;"> 
+            <col style="width: 27%;">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>Jméno</th>
+                <th>Datum příchodu</th>
+                <th>UID</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% if zaznamy is not defined or zaznamy|length == 0 %}
+            <tr>
+                <td colspan="3">Žádné záznamy</td>
+            </tr>
+            {% else %}
+                {% for zaznam in zaznamy %}
+                <tr>
+                    <td>{{zaznam[0]}}</td>
+                    <td>{{zaznam[1]}}</td>
+                    <td>{{zaznam[2]}}</td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+    <div class="row-container page-navigation" id="page-navigation">
+        {% if page > 1 %}
+            <a href="{{ url_for('zaznamy', page=page-1, pocet=pocet, sort=sort_order, start_date=start_date, end_date=end_date) }}#page-navigation">&lt;</a>
+        {% else %}
+            <a class="invisible">&lt;</a>
+        {% endif %}
+        <span>{{page}}</span>
+        {% if zaznamy|length == pocet %}
+            <a href="{{ url_for('zaznamy', page=page+1, pocet=pocet, sort=sort_order, start_date=start_date, end_date=end_date) }}#page-navigation">&gt;</a>
+        {% else %}
+            <a class="invisible">&gt;</a>
+        {% endif %}
+    </div>
+    <nav class="row-container">
+        <span class="selected">Prezence</span>
+        <a class="color-transition" href="{{ url_for('zaznamy', page=1) }}">Záznamy</a>
+        <a  class="color-transition" href="{{ url_for('karty', page=1) }}">Karty</a>
+    </nav>
+</body>
+</html>

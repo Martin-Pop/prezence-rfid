@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Záznamy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <form method="get" action="{{ url_for('zaznamy', page=1) }}">
+
+        <label for="sort">Řazení:</label>
+        <select name="sort" id="sort">
+            <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Od nejstaršího</option>
+            <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Od nejnovějšího</option>
+        </select>
+
+        <label for="start_date">Datum od:</label>
+        <input type="date" name="start_date" id="start_date" value="{{ start_date }}">
+
+        <label for="end_date">Datum do:</label>
+        <input type="date" name="end_date" id="end_date" value="{{ end_date }}">
+
+        <label for="user">Jméno konkrétní uživatele:</label>
+        <input type="text" name="user" id="user" value="{{ user }}" placeholder="Jan123">
+
+        <button type="submit">Použít</button>
+    </form>
+
+    <table class="zaznamy">
+        <colgroup>
+            <col style="width: 25%;"> 
+            <col style="width: 30%;"> 
+            <col style="width: 27%;">
+            <col style="width: 18%;"> 
+        </colgroup>
+        <thead>
+            <tr>
+                <th>Jméno</th>
+                <th>Datum</th>
+                <th>UID</th>
+                <th>Průchod</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% if zaznamy is not defined or zaznamy|length == 0 %}
+            <tr>
+                <td colspan="4">Žádné záznamy</td>
+            </tr>
+            {% else %}
+                {% for zaznam in zaznamy %}
+                <tr>
+                    <td>{{zaznam[0]}}</td>
+                    <td>{{zaznam[1]}}</td>
+                    <td>{{zaznam[2]}}</td>
+                    <td class="{{ 'vchod' if zaznam[3] else 'vychod' }}">{{ "Vchod" if zaznam[3] else "Východ" }}</td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+    </table>
+    <div class="row-container page-navigation" id="page-navigation">
+        {% if page > 1 %}
+            <a href="{{ url_for('zaznamy', page=page-1, pocet=pocet, sort=sort_order, start_date=start_date, end_date=end_date) }}#page-navigation">&lt;</a>
+        {% else %}
+            <a class="invisible">&lt;</a>
+        {% endif %}
+        <span>{{page}}</span>
+        {% if zaznamy|length == pocet %}
+            <a href="{{ url_for('zaznamy', page=page+1, pocet=pocet, sort=sort_order, start_date=start_date, end_date=end_date) }}#page-navigation">&gt;</a>
+        {% else %}
+            <a class="invisible">&gt;</a>
+        {% endif %}
+    </div>
+    <nav class="row-container">
+        <a  class="color-transition" href="{{ url_for('prezence', page=1) }}">Prezence</a>
+        <span class="selected">Záznamy</span>
+        <a  class="color-transition" href="{{ url_for('karty', page=1) }}">Karty</a>
+    </nav>
+</body>
+</html>
