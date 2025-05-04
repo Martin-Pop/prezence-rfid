@@ -30,3 +30,49 @@ Po správném nastavení prostředí je nutné spustit skript **setup_db.py**, k
 ```bash
 python3 setup_db.py
 ```
+### 5. Automatické spouštění při startu systému
+Pro zajištění automatického spuštění aplikace při startu zařízení je vhodné nakonfigurovat službu pomocí systemd. Vytvořím souborů s příponou .service, které budou spouštěny jako systémová služba na pozadí.
+
+Příklad obsahu souboru /etc/systemd/system/rfid-reader.service (script na čtení karet):
+```ini
+[Unit]
+Description=rfid reader script
+
+[Service]
+ExecStart=/home/martin/prezence/venv/bin/python /home/martin/prezence/rfid_reader.py
+WorkingDirectory=/home/martin/prezence
+User=martin
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+Příklad obsahu souboru /etc/systemd/system/prezence-web.service (script na webovou aplikaci):
+```ini
+[Unit]
+Description=Flask Web App pro prezenci
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/home/martin/prezence/venv/bin/python3 /home/martin/prezence/app.py
+WorkingDirectory=/home/martin/prezence
+User=martin
+Group=martin
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+aktivace:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable nazev-sluzby.service
+sudo systemctl start nazev-sluzby.service
+```
